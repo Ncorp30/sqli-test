@@ -1,29 +1,33 @@
 def process_order(order):
+    if not isinstance(order, dict):
+        return "Invalid order"
+
     # Validate customer
-    if order["customer"] is None:
+    customer = order.get("customer")
+    if not isinstance(customer, dict):
         return "Invalid customer"
 
-    customer = order["customer"]
-
     # Validate address
-    if customer["address"] is None:
+    address = customer.get("address")
+    if address is None:
         return "Missing address"
-
-    address = customer["address"]
 
     # Calculate pricing
     price = 0
 
-    for item in order["items"]:
-        if item["type"] == "book":
-            price += item["price"] * 0.9
-        elif item["type"] == "electronics":
-            price += item["price"] * 0.8
-        else:
-            price += item["price"]
+    item_price_multipliers = {
+        "book": 0.9,
+        "electronics": 0.8,
+    }
+
+    for item in order.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        multiplier = item_price_multipliers.get(item.get("type"), 1)
+        price += item.get("price", 0) * multiplier
 
     # Apply discounts
-    if order["discount"]:
+    if order.get("discount"):
         price -= price * 0.1
 
     # Calculate tax
@@ -32,7 +36,7 @@ def process_order(order):
 
     # Create invoice
     invoice = {
-        "customer": customer["name"],
+        "customer": customer.get("name"),
         "address": address,
         "amount": final_price
     }
